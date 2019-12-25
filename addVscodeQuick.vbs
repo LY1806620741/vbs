@@ -32,7 +32,7 @@ set wso=CreateObject("WScript.Shell")
 set fso=CreateObject("Scripting.FileSystemObject") 
 if isAddVSCode=vbYes then
     '搜索默认安装路径
-    vspath=wso.ExpandenVironmentStrings("%LOCALAPPDATA%\Programs\Microsoft VS Code\Code.exe1")
+    vspath=wso.ExpandenVironmentStrings("%LOCALAPPDATA%\Programs\Microsoft VS Code\Code.exe")
     checkVscode(vspath)
 elseif isAddVSCode=vbNo then
     regList=array("HKCR\*\shell\VSCode\command\","HKCR\*\shell\VSCode\","HKCR\Directory\shell\VSCode\command\","HKCR\Directory\shell\VSCode\","HKCR\Directory\Background\shell\VSCode\command\","HKCR\Directory\Background\shell\VSCode\") 
