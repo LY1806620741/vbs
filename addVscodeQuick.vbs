@@ -1,4 +1,24 @@
 isAddVSCode=msgbox("右键菜单添加或移除VsCode，是（添加），否(移除)",vbYesNoCancel,"欢迎")
+Function SelectFile()
+    '使用javascript选择文件并获取文件路径，写入用户变量MsgResp，传递到此脚本，并清理该临时变量
+    Dim fso : Set fso = CreateObject("Scripting.FileSystemObject")
+    Dim tempFolder : Set tempFolder = fso.GetSpecialFolder(2)
+    Dim tempName : tempName = fso.GetTempName()
+    Dim tempFile : Set tempFile = tempFolder.CreateTextFile(tempName & ".hta")
+    tempFile.Write _
+    "<input type='file' id='f' />" & _
+    "<script type='text/javascript'>" & _
+    "var f = document.getElementById('f');" & _
+    "f.click();" & _
+    "var shell = new ActiveXObject('WScript.Shell');" & _
+    "shell.RegWrite('HKEY_CURRENT_USER\\Volatile Environment\\MsgResp', f.value);" & _
+    "window.close();" & _
+    "</script>"
+    tempFile.Close
+    wso.Run tempFolder & "\" & tempName & ".hta", 0, True
+    SelectFile = wso.RegRead("HKEY_CURRENT_USER\Volatile Environment\MsgResp")
+    wso.RegDelete "HKEY_CURRENT_USER\Volatile Environment\MsgResp"
+End Function
 
 sub checkVscode(vspath)'检查VsCode是否存在子过程'
     if vspath="" then
@@ -6,7 +26,8 @@ sub checkVscode(vspath)'检查VsCode是否存在子过程'
     end if
     if fso.fileExists(vspath) then'检查Vscode是否存在'
         if right(vspath,len(vspath)-instrrev(vspath,"\"))<>"Code.exe" then'检查可执行文件名字
-            checkVscode inputbox("可执行文件路径","文件不是VsCode的标准名字，请重新选择",vspath)
+            msgbox "文件不是VsCode的标准名字，请重新选择"
+            checkVscode SelectFile
             wscript.quit
         end if
         vsroot=left(vspath,instrrev(vspath,"\"))
@@ -24,7 +45,8 @@ sub checkVscode(vspath)'检查VsCode是否存在子过程'
         wso.RegWrite "HKCR\Directory\Background\shell\VSCode\command\",""""+vspath+""" ""%v""","REG_SZ"
         msgbox "添加完成"
     else
-        checkVscode inputbox("可执行文件路径","找不到VsCode，需要手动指定路径",vspath)
+        msgbox "找不到VsCode，需要手动指定路径"
+        checkVscode SelectFile
     end if
 end sub
 Dim fso,wso
